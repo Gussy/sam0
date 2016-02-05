@@ -2,8 +2,8 @@
 set -e
 
 # Usage:
-#  wget http://www.atmel.com/images/asf-standalone-archive-3.20.1.101.zip
-#  ./from-atmel-zip.sh asf-standalone-archive-3.20.1.101.zip
+#  wget http://www.atmel.com/images/asf-standalone-archive-3.30.0.43.zip
+#  ./from-atmel-zip.sh asf-standalone-archive-3.30.0.43.zip
 
 DIR=xdk-asf-*
 
@@ -28,5 +28,5 @@ rm -rf linker_scripts
 mv extract/$DIR/sam0/utils/linker_scripts .
 
 rm -rf extract
-find ./* -type f -exec dos2unix {} \;
+find ./* -type f -exec fromdos {} \;
 git add drivers cmsis include linker_scripts
