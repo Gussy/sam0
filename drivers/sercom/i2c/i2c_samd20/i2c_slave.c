@@ -3,7 +3,7 @@
  *
  * \brief SAM D20 I2C Slave Driver
  *
- * Copyright (C) 2013-2014 Atmel Corporation. All rights reserved.
+ * Copyright (c) 2013-2015 Atmel Corporation. All rights reserved.
  *
  * \asf_license_start
  *
@@ -39,6 +39,9 @@
  *
  * \asf_license_stop
  *
+ */
+/*
+ * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
  */
 
 #include "i2c_slave.h"
@@ -120,7 +123,7 @@ static enum status_code _i2c_slave_set_config(
 /**
  * \brief Initializes the requested I<SUP>2</SUP>C hardware module
  *
- * Initializes the SERCOM I<SUP>2</SUP>C Slave device requested and sets the provided
+ * Initializes the SERCOM I<SUP>2</SUP>C slave device requested and sets the provided
  * software module struct.  Run this function before any further use of
  * the driver.
  *
@@ -290,7 +293,7 @@ static enum status_code _i2c_slave_wait_for_bus(
  * \retval STATUS_ERR_IO            There was an error in the previous transfer
  * \retval STATUS_ERR_BAD_FORMAT    Master wants to write data
  * \retval STATUS_ERR_INVALID_ARG   Invalid argument(s) was provided
- * \retval STATUS_ERR_BUSY          The I<SUP>2</SUP>C module is busy with a job.
+ * \retval STATUS_ERR_BUSY          The I<SUP>2</SUP>C module is busy with a job
  * \retval STATUS_ERR_ERR_OVERFLOW  Master NACKed before entire packet was
  *                                  transferred
  * \retval STATUS_ERR_TIMEOUT       No response was given within the timeout
@@ -342,15 +345,15 @@ enum status_code i2c_slave_write_packet_wait(
 
 	/* Check direction */
 	if (!(i2c_hw->STATUS.reg & SERCOM_I2CS_STATUS_DIR)) {
-		/* Write request from master, send NACK and return */
-		i2c_hw->CTRLB.reg |= SERCOM_I2CS_CTRLB_ACKACT;
-		i2c_hw->CTRLB.reg |= SERCOM_I2CS_CTRLB_CMD(0x3);
+		/* Write request from master, send NACK and return, workaround 13574*/
+		_i2c_slave_set_ctrlb_ackact(module, false);
+		_i2c_slave_set_ctrlb_cmd3(module);
 		return STATUS_ERR_BAD_FORMAT;
 	}
 
-	/* Read request from master, ACK address */
-	i2c_hw->CTRLB.reg &= ~SERCOM_I2CS_CTRLB_ACKACT;
-	i2c_hw->CTRLB.reg |= SERCOM_I2CS_CTRLB_CMD(0x3);
+	/* Read request from master, ACK address, workaround 13574 */
+	_i2c_slave_set_ctrlb_ackact(module, true);
+	_i2c_slave_set_ctrlb_cmd3(module);
 
 	uint16_t i = 0;
 
@@ -460,15 +463,15 @@ enum status_code i2c_slave_read_packet_wait(
 	}
 	/* Check direction */
 	if ((i2c_hw->STATUS.reg & SERCOM_I2CS_STATUS_DIR)) {
-		/* Read request from master, send NACK and return */
-		i2c_hw->CTRLB.reg |= SERCOM_I2CS_CTRLB_ACKACT;
-		i2c_hw->CTRLB.reg |= SERCOM_I2CS_CTRLB_CMD(0x3);
+		/* Read request from master, send NACK and return, workaround 13574 */
+		_i2c_slave_set_ctrlb_ackact(module, false);
+		_i2c_slave_set_ctrlb_cmd3(module);
 		return STATUS_ERR_BAD_FORMAT;
 	}
 
-	/* Write request from master, ACK address */
-	i2c_hw->CTRLB.reg &= ~SERCOM_I2CS_CTRLB_ACKACT;
-	i2c_hw->CTRLB.reg |= SERCOM_I2CS_CTRLB_CMD(0x3);
+	/* Write request from master, ACK address, workaround 13574 */
+	_i2c_slave_set_ctrlb_ackact(module, true);
+	_i2c_slave_set_ctrlb_cmd3(module);
 
 	uint16_t i = 0;
 	while (length--) {
@@ -499,7 +502,7 @@ enum status_code i2c_slave_read_packet_wait(
 
 	if (i2c_hw->INTFLAG.reg & SERCOM_I2CS_INTFLAG_DRDY) {
 		/* Buffer is full, send NACK */
-		i2c_hw->CTRLB.reg |= SERCOM_I2CS_CTRLB_ACKACT;
+		_i2c_slave_set_ctrlb_ackact(module, false);
 		i2c_hw->CTRLB.reg |= SERCOM_I2CS_CTRLB_CMD(0x2);
 	}
 	if (i2c_hw->INTFLAG.reg & SERCOM_I2CS_INTFLAG_PREC) {
@@ -512,8 +515,10 @@ enum status_code i2c_slave_read_packet_wait(
 /**
  * \brief Waits for a start condition on the bus
  *
+ * \note This function is only available for 7-bit slave addressing.
+ *
  * Waits for the master to issue a start condition on the bus.
- * Note that this function does not check for errors in the last transfer,
+ * \note This function does not check for errors in the last transfer,
  * this will be discovered when reading or writing.
  *
  * \param[in]  module  Pointer to software module structure

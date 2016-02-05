@@ -3,7 +3,7 @@
  *
  * \brief SAM Watchdog Driver
  *
- * Copyright (C) 2012-2014 Atmel Corporation. All rights reserved.
+ * Copyright (c) 2012-2015 Atmel Corporation. All rights reserved.
  *
  * \asf_license_start
  *
@@ -40,16 +40,19 @@
  * \asf_license_stop
  *
  */
+/*
+ * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
+ */
 #ifndef WDT_H_INCLUDED
 #define WDT_H_INCLUDED
 
 /**
- * \defgroup asfdoc_sam0_wdt_group SAM Watchdog Driver (WDT)
+ * \defgroup asfdoc_sam0_wdt_group SAM Watchdog (WDT) Driver
  *
- * This driver for Atmel® | SMART™ SAM devices provides an interface for the configuration
- * and management of the device's Watchdog Timer module, including the enabling,
- * disabling, and kicking within the device. The following driver API modes are
- * covered by this manual:
+ * This driver for Atmel&reg; | SMART ARM&reg;-based microcontrollers provides
+ * an interface for the configuration and management of the device's Watchdog
+ * Timer module, including the enabling, disabling, and kicking within the device.
+ * The following driver API modes are covered by this manual:
  *
  *  - Polled APIs
  * \if WDT_CALLBACK_MODE
@@ -60,9 +63,12 @@
  *  - WDT (Watchdog Timer)
  *
  * The following devices can use this module:
- *  - Atmel® | SMART™ SAM D20/D21
- *  - Atmel® | SMART™ SAM R21
- *  - Atmel® | SMART™ SAM D10/D11
+ *  - Atmel | SMART SAM D20/D21
+ *  - Atmel | SMART SAM R21
+ *  - Atmel | SMART SAM D09/D10/D11
+ *  - Atmel | SMART SAM L21/L22
+ *  - Atmel | SMART SAM DA1
+ *  - Atmel | SMART SAM C20/C21
  *
  * The outline of this documentation is as follows:
  *  - \ref asfdoc_sam0_wdt_prerequisites
@@ -144,7 +150,7 @@
  * \dot
  * digraph overview {
  *   rankdir=LR;
- *   node [label="GCLK\nGeneric Clock" shape=square] wdt_clock;
+ *   node [label="GCLK*\nGeneric Clock" shape=square] wdt_clock;
  *
  *   subgraph driver {
  *     node [label="<f0> WDT | <f1> Watchdog Counter" shape=record] wdt_module;
@@ -156,6 +162,8 @@
  * }
  * \enddot
  *
+ * \note Watchdog Counter of SAM L21/L22 is \a not provided by GCLK, but it uses an
+ *       internal 1KHz OSCULP32K output clock.
  *
  * \section asfdoc_sam0_wdt_special_considerations Special Considerations
  *
@@ -205,29 +213,29 @@ enum wdt_period {
 	 *  Window and Early Warning periods; its use as the Watchdog Reset
 	 *  Period is invalid. */
 	WDT_PERIOD_NONE     = 0,
-	/** Watchdog period of 8 clocks of the Watchdog Timer Generic Clock. */
+	/** Watchdog period of 8 clocks of the Watchdog Timer Generic Clock */
 	WDT_PERIOD_8CLK     = 1,
-	/** Watchdog period of 16 clocks of the Watchdog Timer Generic Clock. */
+	/** Watchdog period of 16 clocks of the Watchdog Timer Generic Clock */
 	WDT_PERIOD_16CLK    = 2,
-	/** Watchdog period of 32 clocks of the Watchdog Timer Generic Clock. */
+	/** Watchdog period of 32 clocks of the Watchdog Timer Generic Clock */
 	WDT_PERIOD_32CLK    = 3,
-	/** Watchdog period of 64 clocks of the Watchdog Timer Generic Clock. */
+	/** Watchdog period of 64 clocks of the Watchdog Timer Generic Clock */
 	WDT_PERIOD_64CLK    = 4,
-	/** Watchdog period of 128 clocks of the Watchdog Timer Generic Clock. */
+	/** Watchdog period of 128 clocks of the Watchdog Timer Generic Clock */
 	WDT_PERIOD_128CLK   = 5,
-	/** Watchdog period of 256 clocks of the Watchdog Timer Generic Clock. */
+	/** Watchdog period of 256 clocks of the Watchdog Timer Generic Clock */
 	WDT_PERIOD_256CLK   = 6,
-	/** Watchdog period of 512 clocks of the Watchdog Timer Generic Clock. */
+	/** Watchdog period of 512 clocks of the Watchdog Timer Generic Clock */
 	WDT_PERIOD_512CLK   = 7,
-	/** Watchdog period of 1024 clocks of the Watchdog Timer Generic Clock. */
+	/** Watchdog period of 1024 clocks of the Watchdog Timer Generic Clock */
 	WDT_PERIOD_1024CLK  = 8,
-	/** Watchdog period of 2048 clocks of the Watchdog Timer Generic Clock. */
+	/** Watchdog period of 2048 clocks of the Watchdog Timer Generic Clock */
 	WDT_PERIOD_2048CLK  = 9,
-	/** Watchdog period of 4096 clocks of the Watchdog Timer Generic Clock. */
+	/** Watchdog period of 4096 clocks of the Watchdog Timer Generic Clock */
 	WDT_PERIOD_4096CLK  = 10,
-	/** Watchdog period of 8192 clocks of the Watchdog Timer Generic Clock. */
+	/** Watchdog period of 8192 clocks of the Watchdog Timer Generic Clock */
 	WDT_PERIOD_8192CLK  = 11,
-	/** Watchdog period of 16384 clocks of the Watchdog Timer Generic Clock. */
+	/** Watchdog period of 16384 clocks of the Watchdog Timer Generic Clock */
 	WDT_PERIOD_16384CLK = 12,
 };
 
@@ -240,18 +248,20 @@ enum wdt_period {
  */
 struct wdt_conf {
 	/** If \c true, the Watchdog will be locked to the current configuration
-	 *  settings when the Watchdog is enabled. */
+	 *  settings when the Watchdog is enabled */
 	bool always_on;
-	/** Enable/Disable the Watchdog Timer. */
+	/** Enable/Disable the Watchdog Timer */
 	bool enable;
-	/** GCLK generator used to clock the peripheral. */
+#if !(SAML21) && !(SAML22) && !(SAMC20) && !(SAMC21)
+	/** GCLK generator used to clock the peripheral except SAM L21/L22/C21/C20*/
 	enum gclk_generator clock_source;
-	/** Number of Watchdog timer clock ticks until the Watchdog expires. */
+#endif
+	/** Number of Watchdog timer clock ticks until the Watchdog expires */
 	enum wdt_period timeout_period;
-	/** Number of Watchdog timer clock ticks until the reset window opens. */
+	/** Number of Watchdog timer clock ticks until the reset window opens */
 	enum wdt_period window_period;
 	/** Number of Watchdog timer clock ticks until the early warning flag is
-	 *  set. */
+	 *  set */
 	enum wdt_period early_warning_period;
 };
 
@@ -270,14 +280,18 @@ struct wdt_conf {
  *
  * \return Synchronization status of the underlying hardware module(s).
  *
- * \retval true if the module has completed synchronization
- * \retval false if the module synchronization is ongoing
+ * \retval false If the module has completed synchronization
+ * \retval true If the module synchronization is ongoing
  */
 static inline bool wdt_is_syncing(void)
 {
 	Wdt *const WDT_module = WDT;
 
+#if (SAML21) || (SAML22) || (SAMC20) || (SAMC21)
+	if (WDT_module->SYNCBUSY.reg) {
+#else
 	if (WDT_module->STATUS.reg & WDT_STATUS_SYNCBUSY) {
+#endif
 		return true;
 	}
 
@@ -311,7 +325,9 @@ static inline void wdt_get_config_defaults(
 	/* Default configuration values */
 	config->always_on            = false;
 	config->enable               = true;
+#if !(SAML21) && !(SAML22) && !(SAMC20) && !(SAMC21)
 	config->clock_source         = GCLK_GENERATOR_4;
+#endif
 	config->timeout_period       = WDT_PERIOD_16384CLK;
 	config->window_period        = WDT_PERIOD_NONE;
 	config->early_warning_period = WDT_PERIOD_NONE;
@@ -331,7 +347,11 @@ static inline bool wdt_is_locked(void)
 {
 	Wdt *const WDT_module = WDT;
 
+#if (SAML21) || (SAML22) || (SAMC20) || (SAMC21)
+	return (WDT_module->CTRLA.reg & WDT_CTRLA_ALWAYSON);
+#else
 	return (WDT_module->CTRL.reg & WDT_CTRL_ALWAYSON);
+#endif
 }
 
 /** @} */
@@ -340,9 +360,9 @@ static inline bool wdt_is_locked(void)
  * @{
  */
 
-/** \brief Clears the Watchdog timer Early Warning period elapsed flag.
+/** \brief Clears the Watchdog timer early warning period elapsed flag.
  *
- *  Clears the Watchdog timer Early Warning period elapsed flag, so that a new
+ *  Clears the Watchdog timer early warning period elapsed flag, so that a new
  *  early warning period can be detected.
  */
 static inline void wdt_clear_early_warning(void)
@@ -352,9 +372,9 @@ static inline void wdt_clear_early_warning(void)
 	WDT_module->INTFLAG.reg = WDT_INTFLAG_EW;
 }
 
-/** \brief Determines if the Watchdog timer Early Warning period has elapsed.
+/** \brief Determines if the Watchdog timer early warning period has elapsed.
  *
- *  Determines if the Watchdog timer Early Warning period has elapsed.
+ *  Determines if the Watchdog timer early warning period has elapsed.
  *
  *  \note If no early warning period was configured, the value returned by this
  *        function is invalid.
@@ -417,7 +437,7 @@ void wdt_reset_count(void);
  *		<th>Changelog</th>
  *	</tr>
  *	<tr>
- *		<td>Add SAMD21 support and driver updated to follow driver type convention:
+ *		<td>Driver updated to follow driver type convention:
  *             \li wdt_init, wdt_enable, wdt_disable functions removed
  *             \li wdt_set_config function added
  *             \li WDT module enable state moved inside the configuration struct </td>
@@ -434,7 +454,7 @@ void wdt_reset_count(void);
  * This is a list of the available Quick Start guides (QSGs) and example
  * applications for \ref asfdoc_sam0_wdt_group. QSGs are simple examples with
  * step-by-step instructions to configure and use this driver in a selection of
- * use cases. Note that QSGs can be compiled as a standalone application or be
+ * use cases. Note that a QSG can be compiled as a standalone application or be
  * added to the user application.
  *
  *  - \subpage asfdoc_sam0_wdt_basic_use_case
@@ -446,27 +466,32 @@ void wdt_reset_count(void);
  *
  * <table>
  *	<tr>
- *		<th>Doc. Rev.</td>
- *		<th>Date</td>
- *		<th>Comments</td>
+ *		<th>Doc. Rev.</th>
+ *		<th>Date</th>
+ *		<th>Comments</th>
  *	</tr>
  *	<tr>
- *		<td>D</td>
- *		<td>05/2014</td>
- *		<td>Added SAMR21 and SAMD10/D11 support.</td>
+ *		<td>42124E</td>
+ *		<td>12/2015</td>
+ *		<td>Added support for SAM L21/L22, SAM DA1, SAM D09, and SAM C20/C21</td>
  *	</tr>
  *	<tr>
- *		<td>C</td>
+ *		<td>42124D</td>
+ *		<td>12/2014</td>
+ *		<td>Added SAM R21 and SAM D10/D11 support</td>
+ *	</tr>
+ *	<tr>
+ *		<td>42124C</td>
  *		<td>01/2014</td>
- *		<td>Add SAMD21 support.</td>
+ *		<td>Add SAM D21 support</td>
  *	</tr>
  *	<tr>
- *		<td>B</td>
+ *		<td>42124B</td>
  *		<td>06/2013</td>
- *		<td>Corrected documentation typos.</td>
+ *		<td>Corrected documentation typos</td>
  *	</tr>
  *	<tr>
- *		<td>A</td>
+ *		<td>42124A</td>
  *		<td>06/2013</td>
  *		<td>Initial release</td>
  *	</tr>

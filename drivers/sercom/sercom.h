@@ -3,7 +3,7 @@
  *
  * \brief SAM Serial Peripheral Interface Driver
  *
- * Copyright (C) 2012-2014 Atmel Corporation. All rights reserved.
+ * Copyright (C) 2012-2015 Atmel Corporation. All rights reserved.
  *
  * \asf_license_start
  *
@@ -40,6 +40,9 @@
  * \asf_license_stop
  *
  */
+/*
+ * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
+ */
 
 #ifndef SERCOM_H_INCLUDED
 #define SERCOM_H_INCLUDED
@@ -54,30 +57,12 @@
 extern "C" {
 #endif
 
-#if (SAMD10) || (SAMD11)
-
-#if (SERCOM0_GCLK_ID_SLOW == SERCOM1_GCLK_ID_SLOW && \
-     SERCOM0_GCLK_ID_SLOW == SERCOM2_GCLK_ID_SLOW)
-#  define SERCOM_GCLK_ID SERCOM0_GCLK_ID_SLOW
-#else
-#  error "SERCOM modules must share the same slow GCLK channel ID."
-#endif
-
-#else
-
-#if (SERCOM0_GCLK_ID_SLOW == SERCOM1_GCLK_ID_SLOW && \
-     SERCOM0_GCLK_ID_SLOW == SERCOM2_GCLK_ID_SLOW && \
-     SERCOM0_GCLK_ID_SLOW == SERCOM3_GCLK_ID_SLOW)
-#  define SERCOM_GCLK_ID SERCOM0_GCLK_ID_SLOW
-#else
-#  error "SERCOM modules must share the same slow GCLK channel ID."
-#endif
-
-#endif
+/* SERCOM modules should share  same slow GCLK channel ID */
+#define SERCOM_GCLK_ID SERCOM0_GCLK_ID_SLOW
 
 #if (0x1ff >= REV_SERCOM)
 #  define FEATURE_SERCOM_SYNCBUSY_SCHEME_VERSION_1
-#elif (0x2ff >= REV_SERCOM)
+#elif (0x400 >= REV_SERCOM)
 #  define FEATURE_SERCOM_SYNCBUSY_SCHEME_VERSION_2
 #else
 #  error "Unknown SYNCBUSY scheme for this SERCOM revision"

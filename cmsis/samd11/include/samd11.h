@@ -3,7 +3,7 @@
  *
  * \brief Top header file for SAMD11
  *
- * Copyright (c) 2014 Atmel Corporation. All rights reserved.
+ * Copyright (c) 2015 Atmel Corporation. All rights reserved.
  *
  * \asf_license_start
  *
@@ -55,6 +55,8 @@
   #include "samd11d14am.h"
 #elif defined(__SAMD11D14AS__) || defined(__ATSAMD11D14AS__)
   #include "samd11d14as.h"
+#elif defined(__SAMD11D14AU__) || defined(__ATSAMD11D14AU__)
+  #include "samd11d14au.h"
 #else
   #error Library does not support the specified device.
 #endif

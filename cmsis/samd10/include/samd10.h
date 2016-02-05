@@ -3,7 +3,7 @@
  *
  * \brief Top header file for SAMD10
  *
- * Copyright (c) 2014 Atmel Corporation. All rights reserved.
+ * Copyright (c) 2014-2015 Atmel Corporation. All rights reserved.
  *
  * \asf_license_start
  *
@@ -40,6 +40,9 @@
  * \asf_license_stop
  *
  */
+/*
+ * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
+ */
 
 #ifndef _SAMD10_
 #define _SAMD10_
@@ -67,6 +70,8 @@
   #include "samd10d14am.h"
 #elif defined(__SAMD10D14AS__) || defined(__ATSAMD10D14AS__)
   #include "samd10d14as.h"
+#elif defined(__SAMD10D14AU__) || defined(__ATSAMD10D14AU__)
+  #include "samd10d14au.h"
 #else
   #error Library does not support the specified device.
 #endif

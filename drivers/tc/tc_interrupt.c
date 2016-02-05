@@ -3,7 +3,7 @@
  *
  * \brief SAM TC - Timer Counter Callback Driver
  *
- * Copyright (C) 2013-2014 Atmel Corporation. All rights reserved.
+ * Copyright (C) 2013-2015 Atmel Corporation. All rights reserved.
  *
  * \asf_license_start
  *
@@ -41,6 +41,10 @@
  *
  */
 
+/*
+ * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
+ */
+
 #include "tc_interrupt.h"
 
 void *_tc_instances[TC_INST_NUM];
@@ -48,7 +52,7 @@ void *_tc_instances[TC_INST_NUM];
 void _tc_interrupt_handler(uint8_t instance);
 
 /**
- * \brief Registers a callback
+ * \brief Registers a callback.
  *
  * Registers a callback function which is implemented by the user.
  *
@@ -56,7 +60,7 @@ void _tc_interrupt_handler(uint8_t instance);
  * in order for the interrupt handler to call it when the conditions for the
  * callback type is met.
  *
- * \param[in]     module      Pointer to TC software instance struct
+ * \param[in]     module        Pointer to TC software instance struct
  * \param[in]     callback_func Pointer to callback function
  * \param[in]     callback_type Callback type given by an enum
  */
@@ -86,12 +90,12 @@ enum status_code tc_register_callback(
 }
 
 /**
- * \brief Unregisters a callback
+ * \brief Unregisters a callback.
  *
- * Unregisters a callback function implemented by the user. The callback should be 
+ * Unregisters a callback function implemented by the user. The callback should be
  * disabled before it is unregistered.
  *
- * \param[in]     module Pointer to TC software instance struct
+ * \param[in]     module        Pointer to TC software instance struct
  * \param[in]     callback_type Callback type given by an enum
  */
 enum status_code tc_unregister_callback(
@@ -128,7 +132,13 @@ enum status_code tc_unregister_callback(
 			_tc_interrupt_handler(m); \
 		}
 
-MRECURSION(TC_INST_NUM, _TC_INTERRUPT_HANDLER, TC_INST_MAX_ID)
+#if (SAML21E) || (SAML21G)
+	_TC_INTERRUPT_HANDLER(0,0)
+	_TC_INTERRUPT_HANDLER(1,1)
+	_TC_INTERRUPT_HANDLER(4,2)
+#else
+	MRECURSION(TC_INST_NUM, _TC_INTERRUPT_HANDLER, TC_INST_MAX_ID)
+#endif
 
 
 /**
@@ -138,7 +148,7 @@ MRECURSION(TC_INST_NUM, _TC_INTERRUPT_HANDLER, TC_INST_MAX_ID)
  * that are registered and enabled.
  *
  * \param[in]  instance  ID of the TC instance calling the interrupt
- *                       handler.
+ *                       handler
  */
 void _tc_interrupt_handler(
 		uint8_t instance)
